@@ -47,9 +47,31 @@ export default function createServer({
 		async () => {
 			try {
 				console.log('🔵 [health_check] Starting Gemini CLI health check')
-				const { stdout, stderr } = await execAsync('npx -y gemini -m gemini-2.5-flash -p "say hi"', { 
-					timeout: 10000
-				})
+				// Try different methods to execute gemini
+				let stdout: string = ''
+				let stderr: string = ''
+				
+				try {
+					// Method 1: Try direct npx
+					const result = await execAsync('npx -y gemini -m gemini-2.5-flash -p "say hi"', { 
+						timeout: 10000,
+						env: { ...process.env }
+					})
+					stdout = result.stdout
+					stderr = result.stderr
+				} catch (npxError) {
+					// Method 2: Try with shell
+					try {
+						const shellCommand = process.platform === 'win32' 
+							? 'cmd /c npx -y gemini -m gemini-2.5-flash -p "say hi"'
+							: 'sh -c \'npx -y gemini -m gemini-2.5-flash -p "say hi"\''
+						const result = await execAsync(shellCommand, { timeout: 10000 })
+						stdout = result.stdout
+						stderr = result.stderr
+					} catch (shellError) {
+						throw new Error(`Failed to execute gemini. Please ensure gemini CLI is installed globally: npm install -g gemini`)
+					}
+				}
 				
 				if (stderr) {
 					console.error('⚠️ [health_check] stderr output:', stderr)
