@@ -33,24 +33,10 @@ export default function createServer({
 	config: z.infer<typeof configSchema> // Define your config in smithery.yaml
 }) {
 	const server = new McpServer({
-		name: "Say Hello",
-		version: "1.0.0",
+		name: "entrust-gemini-cli",
+		version: "0.0.1",
 	})
 
-	// Add a tool
-	server.registerTool(
-		"hello",
-		{
-			title: "Hello Tool",
-			description: "Say hello to someone",
-			inputSchema: { name: z.string().describe("Name to greet") },
-		},
-		async ({ name }) => ({
-			content: [{ type: "text", text: `Hello, ${name}!` }],
-		}),
-	)
-
-	// Add health_check tool
 	server.registerTool(
 		"health_check",
 		{
@@ -61,11 +47,10 @@ export default function createServer({
 		async () => {
 			try {
 				console.log('🔵 [health_check] Starting Gemini CLI health check')
-				
-				const command = 'gemini -m gemini-2.5-flash -p "say hi"'
-				console.log('🌐 [health_check] Executing command:', command)
-				
-				const { stdout, stderr } = await execAsync(command, { timeout: 10000 })
+				const { stdout, stderr } = await execAsync(`bash -l -c gemini -m gemini-2.5-flash -p "say hi"`, { 
+					timeout: 10000
+				})
+				console.log('🌐 [health_check] Executing... ')
 				
 				if (stderr) {
 					console.error('❌ [health_check] stderr output:', stderr)
@@ -96,49 +81,6 @@ export default function createServer({
 		},
 	)
 
-	// Add a resource
-	server.registerResource(
-		"hello-world-history",
-		"history://hello-world",
-		{
-			title: "Hello World History",
-			description: "The origin story of the famous 'Hello, World' program",
-		},
-		async uri => ({
-			contents: [
-				{
-					uri: uri.href,
-					text: '"Hello, World" first appeared in a 1972 Bell Labs memo by Brian Kernighan and later became the iconic first program for beginners in countless languages.',
-					mimeType: "text/plain",
-				},
-			],
-		}),
-	)
-
-	// Add a prompt
-	server.registerPrompt(
-		"greet",
-		{
-			title: "Hello Prompt",
-			description: "Say hello to someone",
-			argsSchema: {
-				name: z.string().describe("Name of the person to greet"),
-			},
-		},
-		async ({ name }) => {
-			return {
-				messages: [
-					{
-						role: "user",
-						content: {
-							type: "text",
-							text: `Say hello to ${name}`,
-						},
-					},
-				],
-			}
-		},
-	)
 
 	return server.server
 }
