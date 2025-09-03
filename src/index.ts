@@ -47,13 +47,13 @@ export default function createServer({
 		async () => {
 			try {
 				console.log('🔵 [health_check] Starting Gemini CLI health check')
-				const { stdout, stderr } = await execAsync(`bash -l -c 'gemini -m gemini-2.5-flash -p "say hi"'`, { 
-					timeout: 10000
+				const { stdout, stderr } = await execAsync('$(which gemini) -m gemini-2.5-flash -p "say hi"', { 
+					timeout: 10000,
+					shell: '/bin/bash'
 				})
-				console.log('🌐 [health_check] Executing... ')
 				
 				if (stderr) {
-					console.error('❌ [health_check] stderr output:', stderr)
+					console.error('⚠️ [health_check] stderr output:', stderr)
 				}
 				
 				console.log('✅ [health_check] Command executed successfully')
