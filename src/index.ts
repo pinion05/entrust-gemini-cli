@@ -47,7 +47,7 @@ export default function createServer({
 		async () => {
 			try {
 				console.log('🔵 [health_check] Starting Gemini CLI health check')
-				const { stdout, stderr } = await execAsync('$(which gemini) -m gemini-2.5-flash -p "say hi"', { 
+				const { stdout, stderr } = await execAsync('PATH=$PATH:~/.nvm/versions/node/v*/bin && gemini -m gemini-2.5-flash -p "say hi"', { 
 					timeout: 10000,
 					shell: '/bin/bash'
 				})
